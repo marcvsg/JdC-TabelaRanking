@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useAuthContext } from '../context/AuthContext';
+import logo from '../assets/imgs/logo.gif';
 
 export function LoginPage() {
   const { login, signup } = useAuthContext();
@@ -29,7 +30,7 @@ export function LoginPage() {
   return (
     <div className="login-wrapper">
       <div className="login-card">
-        <h1 className="login-title"><img src='../src/assets/imgs/logo.gif' alt="Logo" /></h1>
+        <h1 className="login-title"><img src={logo} alt="Logo" /></h1>
         <p className="login-subtitle">
           {isSignup ? 'Crie sua conta' : 'Entre na sua conta'}
         </p>
