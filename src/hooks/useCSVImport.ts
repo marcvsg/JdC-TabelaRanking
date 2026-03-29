@@ -1,4 +1,4 @@
-import { doc, updateDoc, addDoc, collection, getDoc } from 'firebase/firestore';
+import { doc, updateDoc, addDoc, collection } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { Column, Participant } from '../lib/types';
 
