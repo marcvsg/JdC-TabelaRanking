@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p src/lib src/hooks src/context src/components src/pages)",
+      "Bash(rm -f src/App.css src/assets/react.svg)",
+      "Bash(npx vite:*)"
+    ]
+  }
+}
