@@ -7,15 +7,24 @@ interface AddParticipantFormProps {
 export function AddParticipantForm({ onAdd }: AddParticipantFormProps) {
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const trimmed = name.trim();
     if (!trimmed) return;
+
+    setError('');
     setLoading(true);
-    await onAdd(trimmed);
-    setName('');
-    setLoading(false);
+
+    try {
+      await onAdd(trimmed);
+      setName('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao adicionar participante');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -34,6 +43,7 @@ export function AddParticipantForm({ onAdd }: AddParticipantFormProps) {
       >
         + Participante
       </button>
+      {error && <p className="error-message">{error}</p>}
     </form>
   );
 }

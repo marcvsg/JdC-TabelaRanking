@@ -29,6 +29,13 @@ export function useParticipants() {
   }, []);
 
   async function addParticipant(name: string) {
+    const normalizedName = name.toLowerCase();
+    const exists = participants.some(p => p.name.toLowerCase() === normalizedName);
+
+    if (exists) {
+      throw new Error(`Participante "${name}" já existe na lista`);
+    }
+
     await addDoc(collection(db, COLLECTION), {
       name,
       scores: {},
