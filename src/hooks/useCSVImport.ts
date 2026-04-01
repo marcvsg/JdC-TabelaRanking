@@ -59,10 +59,16 @@ export function useCSVImport() {
       if (col) colMap[h] = col.id;
     });
 
+    // Rastrear participantes criados neste import para evitar duplicatas dentro do mesmo CSV
+    const createdInImport: Map<string, { id: string; scores: Record<string, number> }> = new Map();
+    let mergedCount = 0;
+
     // Processar linhas
     for (const row of rows) {
       const name = String(row[nameCol]).trim();
       if (!name) continue;
+
+      const nameLower = name.toLowerCase();
 
       // Verificar se a linha tem pelo menos um score válido (não 0 e não vazio)
       const hasValidScore = headers.slice(1).some((h) => {
@@ -71,11 +77,15 @@ export function useCSVImport() {
       });
       if (!hasValidScore) continue;
 
-      // Encontrar participante existente
-      const existing = participants.find((p) => p.name === name);
+      // Encontrar participante existente (case-insensitive)
+      const existing = participants.find(
+        (p) => p.name.toLowerCase() === nameLower
+      );
+      // Ou encontrado no próprio CSV anterior
+      const createdEntry = createdInImport.get(nameLower);
 
       if (existing) {
-        // Somar scores (ignorar 0 e vazios)
+        // Somar scores ao participante existente (ignorar 0 e vazios)
         const updatedScores = { ...existing.scores };
         headers.slice(1).forEach((h) => {
           const value = Number(row[h]);
@@ -88,6 +98,23 @@ export function useCSVImport() {
         await updateDoc(doc(db, 'participants', existing.id), {
           scores: updatedScores,
         });
+        // Atualizar snapshot local para acumular se aparecer de novo no CSV
+        existing.scores = updatedScores;
+        mergedCount++;
+      } else if (createdEntry) {
+        // Somar scores ao participante criado neste mesmo import
+        headers.slice(1).forEach((h) => {
+          const value = Number(row[h]);
+          const colId = colMap[h];
+          if (!isNaN(value) && value !== 0 && String(row[h]).trim() !== '') {
+            createdEntry.scores[colId] = (createdEntry.scores[colId] ?? 0) + value;
+          }
+        });
+
+        await updateDoc(doc(db, 'participants', createdEntry.id), {
+          scores: createdEntry.scores,
+        });
+        mergedCount++;
       } else {
         // Criar novo participante (ignorar 0 e vazios)
         const scores: Record<string, number> = {};
@@ -99,15 +126,17 @@ export function useCSVImport() {
           }
         });
 
-        await addDoc(collection(db, 'participants'), {
+        const docRef = await addDoc(collection(db, 'participants'), {
           name,
           scores,
           createdAt: Date.now(),
         });
+        // Rastrear para evitar duplicata dentro do mesmo CSV
+        createdInImport.set(nameLower, { id: docRef.id, scores });
       }
     }
 
-    return { imported: rows.length, merged: rows.filter(r => participants.some(p => p.name === String(r[nameCol]))).length };
+    return { imported: rows.length, merged: mergedCount };
   }
 
   return { parseCSV, importCSV };
