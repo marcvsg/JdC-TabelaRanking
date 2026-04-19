@@ -12,6 +12,7 @@ interface MatchWithWinner {
   p1?: Participant & { score: number };
   p2?: Participant & { score: number };
   winnerId?: string;
+  isDraw?: boolean;
 }
 
 export function BracketView({
@@ -53,13 +54,13 @@ export function BracketView({
 
       // Calcular vencedores da rodada atual e preencher próxima
       currentMatches.forEach((match, idx) => {
-        const winner = calcMatchWinner(match, participants, selectedColumns);
-        if (winner && nextMatches[Math.floor(idx / 2)]) {
+        const result = getMatchResult(match, participants, selectedColumns);
+        if (result.winnerId && nextMatches[Math.floor(idx / 2)]) {
           const nextMatch = nextMatches[Math.floor(idx / 2)];
           if (idx % 2 === 0) {
-            nextMatch.participant1Id = winner;
+            nextMatch.participant1Id = result.winnerId;
           } else {
-            nextMatch.participant2Id = winner;
+            nextMatch.participant2Id = result.winnerId;
           }
         }
       });
@@ -88,13 +89,14 @@ export function BracketView({
           ? selectedColumns.reduce((s, c) => s + (p2.scores[c.id] ?? 0), 0)
           : 0;
 
-      const winnerId = calcMatchWinner(match, participants, selectedColumns);
+      const result = getMatchResult(match, participants, selectedColumns);
 
       return {
         match,
         p1: p1 ? { ...p1, score: score1 } : undefined,
         p2: p2 ? { ...p2, score: score2 } : undefined,
-        winnerId,
+        winnerId: result.winnerId,
+        isDraw: result.isDraw,
       } as MatchWithWinner;
     });
   }, [hydratedBracket, participants, selectedColumns]);
@@ -126,7 +128,7 @@ export function BracketView({
             </h4>
             <div className="bracket-matches">
               {roundMatches.map((m, matchIdx) => (
-                <div key={matchIdx} className="bracket-match">
+                <div key={matchIdx} className={`bracket-match ${m.isDraw ? 'draw' : ''}`}>
                   <div className={`match-team ${m.p1 && m.winnerId === m.p1.id ? 'winner' : ''}`}>
                     {m.p1 ? (
                       <>
@@ -137,6 +139,7 @@ export function BracketView({
                       <span className="team-name">—</span>
                     )}
                   </div>
+                  {m.isDraw && <div className="match-draw-label">EMPATE</div>}
                   <div className="match-divider" />
                   <div className={`match-team ${m.p2 && m.winnerId === m.p2.id ? 'winner' : ''}`}>
                     {m.p2 ? (
@@ -177,11 +180,11 @@ function getRoundLabel(round: number): string {
   return labels[round] || `Rodada ${round}`;
 }
 
-function calcMatchWinner(
+function getMatchResult(
   match: BracketMatch,
   participants: Participant[],
   selectedColumns: Column[]
-): string | undefined {
+): { winnerId?: string; isDraw: boolean } {
   const p1 = match.participant1Id
     ? participants.find((p) => p.id === match.participant1Id)
     : undefined;
@@ -189,7 +192,7 @@ function calcMatchWinner(
     ? participants.find((p) => p.id === match.participant2Id)
     : undefined;
 
-  if (!p1 || !p2) return undefined;
+  if (!p1 || !p2) return { isDraw: false };
 
   const score1 = selectedColumns.reduce(
     (s, c) => s + (p1.scores[c.id] ?? 0),
@@ -200,17 +203,18 @@ function calcMatchWinner(
     0
   );
 
-  if (score2 > score1) return p2.id;
-  if (score1 > score2) return p1.id;
+  if (score2 > score1) return { winnerId: p2.id, isDraw: false };
+  if (score1 > score2) return { winnerId: p1.id, isDraw: false };
 
   // Tiebreaker: última coluna
   const lastCol = selectedColumns[selectedColumns.length - 1];
   if (lastCol) {
     const s1 = p1.scores[lastCol.id] ?? 0;
     const s2 = p2.scores[lastCol.id] ?? 0;
-    if (s2 > s1) return p2.id;
-    if (s1 > s2) return p1.id;
+    if (s2 > s1) return { winnerId: p2.id, isDraw: false };
+    if (s1 > s2) return { winnerId: p1.id, isDraw: false };
   }
 
-  return undefined;
+  // Empate
+  return { isDraw: true };
 }
