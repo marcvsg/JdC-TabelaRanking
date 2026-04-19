@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
 
 import topLeft from '../assets/Header/977_blk_window.top.left.png';
@@ -35,7 +36,13 @@ export function Layout({ children }: { children: ReactNode }) {
 
         {/* Content on top of the 9-slice */}
         <div className="habbo-header-content">
-          <img src={logo} alt="Dashboard" />
+          <div className="header-left">
+            <img src={logo} alt="Dashboard" />
+            <nav className="header-nav">
+              <Link to="/" className="nav-link">Dashboard</Link>
+              <Link to="/championships" className="nav-link">Campeonatos</Link>
+            </nav>
+          </div>
           <div className="header-right">
             <span
               className={`badge ${role === 'admin' ? 'badge-admin' : 'badge-viewer'}`}

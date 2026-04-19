@@ -1,0 +1,82 @@
+import { useState, useEffect } from 'react';
+import {
+  collection,
+  onSnapshot,
+  addDoc,
+  deleteDoc,
+  updateDoc,
+  doc,
+} from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import type { Championship, ChampionshipGroup } from '../lib/types';
+
+const COLLECTION = 'championships';
+
+export function useChampionships() {
+  const [championships, setChampionships] = useState<Championship[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, COLLECTION), (snap) => {
+      const data = snap.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      })) as Championship[];
+      setChampionships(data);
+      setLoading(false);
+    });
+    return unsubscribe;
+  }, []);
+
+  async function addChampionship(
+    name: string,
+    columnIds: string[],
+    groupCount: number,
+    classifyCount: number
+  ) {
+    const groups: ChampionshipGroup[] = Array.from({ length: groupCount }, (_, i) => ({
+      id: `group_${String.fromCharCode(65 + i)}`,
+      name: `Chave ${String.fromCharCode(65 + i)}`,
+      participantIds: [],
+    }));
+
+    await addDoc(collection(db, COLLECTION), {
+      name,
+      columnIds,
+      groups,
+      classifyCount,
+      createdAt: Date.now(),
+    });
+  }
+
+  async function deleteChampionship(id: string) {
+    await deleteDoc(doc(db, COLLECTION, id));
+  }
+
+  async function updateChampionship(id: string, updates: Partial<Championship>) {
+    await updateDoc(doc(db, COLLECTION, id), updates);
+  }
+
+  async function updateGroupParticipants(
+    championshipId: string,
+    groupId: string,
+    participantIds: string[]
+  ) {
+    const championship = championships.find((c) => c.id === championshipId);
+    if (!championship) return;
+
+    const updatedGroups = championship.groups.map((g) =>
+      g.id === groupId ? { ...g, participantIds } : g
+    );
+    await updateDoc(doc(db, COLLECTION, championshipId), { groups: updatedGroups });
+  }
+
+  return {
+    championships,
+    loading,
+    addChampionship,
+    deleteChampionship,
+    updateChampionship,
+    updateGroupParticipants,
+  };
+}

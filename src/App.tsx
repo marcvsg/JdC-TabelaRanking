@@ -4,6 +4,8 @@ import { LoginPage } from './components/LoginPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { DashboardPage } from './pages/DashboardPage';
 import { ImportPage } from './pages/ImportPage';
+import { ChampionshipsPage } from './pages/ChampionshipsPage';
+import { ChampionshipDetailPage } from './pages/ChampionshipDetailPage';
 
 function LoginRoute() {
   const { user, loading } = useAuthContext();
@@ -31,6 +33,22 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ImportPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/championships"
+            element={
+              <ProtectedRoute>
+                <ChampionshipsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/championships/:id"
+            element={
+              <ProtectedRoute>
+                <ChampionshipDetailPage />
               </ProtectedRoute>
             }
           />
