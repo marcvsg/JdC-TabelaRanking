@@ -17,12 +17,23 @@ export interface ChampionshipGroup {
   participantIds: string[];
 }
 
+export interface BracketMatch {
+  id: string;
+  round: number;
+  position: number;
+  participant1Id?: string;
+  participant2Id?: string;
+}
+
 export interface Championship {
   id: string;
   name: string;
   columnIds: string[];
   groups: ChampionshipGroup[];
   classifyCount: number;
+  currentPhase: 1 | 2;
+  phase2ColumnIds?: string[];
+  bracket?: BracketMatch[];
   createdAt: number;
 }
 

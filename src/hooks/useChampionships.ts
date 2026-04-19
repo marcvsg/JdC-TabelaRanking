@@ -45,6 +45,7 @@ export function useChampionships() {
       columnIds,
       groups,
       classifyCount,
+      currentPhase: 1,
       createdAt: Date.now(),
     });
   }
@@ -71,6 +72,23 @@ export function useChampionships() {
     await updateDoc(doc(db, COLLECTION, championshipId), { groups: updatedGroups });
   }
 
+  async function startPhase2(
+    championshipId: string,
+    phase2ColumnIds: string[],
+    classifiedParticipantIds: string[]
+  ) {
+    const championship = championships.find((c) => c.id === championshipId);
+    if (!championship) return;
+
+    const bracket = generateBracket(classifiedParticipantIds);
+
+    await updateDoc(doc(db, COLLECTION, championshipId), {
+      currentPhase: 2,
+      phase2ColumnIds,
+      bracket,
+    });
+  }
+
   return {
     championships,
     loading,
@@ -78,5 +96,52 @@ export function useChampionships() {
     deleteChampionship,
     updateChampionship,
     updateGroupParticipants,
+    startPhase2,
   };
+}
+
+function generateBracket(classifiedParticipantIds: string[]) {
+  const classifieds = classifiedParticipantIds;
+
+  // Arredondar para próxima potência de 2
+  let n = classifieds.length;
+  let pow = 0;
+  while (Math.pow(2, pow) < n) pow++;
+  const totalSlots = Math.pow(2, pow);
+
+  // Padronizar para próxima potência de 2 (byes = undefined)
+  const seeds: (string | undefined)[] = [...classifieds];
+  while (seeds.length < totalSlots) seeds.push(undefined);
+
+  // Gerar bracket (primeira rodada)
+  const rounds = pow;
+  const matches: any[] = [];
+  let matchId = 0;
+
+  for (let r = rounds; r >= 1; r--) {
+    const matchesInRound = Math.pow(2, rounds - r);
+    for (let pos = 0; pos < matchesInRound; pos++) {
+      if (r === rounds) {
+        // Primeira rodada: pares de seeds
+        const idx1 = pos * 2;
+        const idx2 = pos * 2 + 1;
+        matches.push({
+          id: `match_${matchId++}`,
+          round: r,
+          position: pos,
+          participant1Id: seeds[idx1],
+          participant2Id: seeds[idx2],
+        });
+      } else {
+        // Rodadas subsequentes: vazio (será preenchido com vencedores)
+        matches.push({
+          id: `match_${matchId++}`,
+          round: r,
+          position: pos,
+        });
+      }
+    }
+  }
+
+  return matches as any[];
 }

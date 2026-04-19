@@ -1210,3 +1210,127 @@ input, button {
   padding-top: 16px;
   border-top: 1px solid #334155;
 }
+
+.phase2-info {
+  background-color: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  padding: 12px;
+  margin: 16px 0;
+  font-size: 0.875rem;
+  color: #cbd5e1;
+}
+
+.phase2-info p {
+  margin: 0;
+}
+
+/* ===== Bracket View ===== */
+.bracket-container {
+  padding: 20px 0;
+}
+
+.bracket-rounds {
+  display: flex;
+  gap: 32px;
+  overflow-x: auto;
+  padding: 20px 0;
+  justify-content: center;
+}
+
+.bracket-round {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 200px;
+}
+
+.round-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-align: center;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.bracket-matches {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: center;
+}
+
+.bracket-match {
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.match-team {
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  border-bottom: 1px solid #334155;
+  transition: background-color 0.2s;
+}
+
+.match-team:last-child {
+  border-bottom: none;
+}
+
+.match-team.winner {
+  background-color: rgba(34, 197, 94, 0.15);
+  font-weight: 600;
+}
+
+.team-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #cbd5e1;
+}
+
+.match-team.winner .team-name {
+  color: #86efac;
+}
+
+.team-score {
+  font-weight: 600;
+  color: #60a5fa;
+  min-width: 32px;
+  text-align: right;
+}
+
+.match-divider {
+  background-color: #334155;
+}
+
+.bracket-columns-info {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #334155;
+}
+
+.phase-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #334155;
+}
+
+.phase-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+}
