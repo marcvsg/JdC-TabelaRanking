@@ -27,10 +27,51 @@ export function BracketView({
     [columns, championship.phase2ColumnIds]
   );
 
-  const matchesWithScores = useMemo(() => {
+  const hydratedBracket = useMemo(() => {
     if (!championship.bracket) return [];
 
-    return championship.bracket.map((match) => {
+    // Copiar bracket e preencher matches subsequentes com vencedores
+    const bracket = championship.bracket.map((m) => ({ ...m }));
+
+    // Agrupar por round
+    const roundMap = new Map<number, typeof bracket>();
+    bracket.forEach((match) => {
+      if (!roundMap.has(match.round)) {
+        roundMap.set(match.round, []);
+      }
+      roundMap.get(match.round)!.push(match);
+    });
+
+    // Processar de baixo para cima (primeira rodada → final)
+    const sortedRounds = Array.from(roundMap.keys()).sort((a, b) => b - a);
+
+    for (let i = 0; i < sortedRounds.length - 1; i++) {
+      const currentRound = sortedRounds[i];
+      const nextRound = sortedRounds[i + 1];
+      const currentMatches = roundMap.get(currentRound) || [];
+      const nextMatches = roundMap.get(nextRound) || [];
+
+      // Calcular vencedores da rodada atual e preencher próxima
+      currentMatches.forEach((match, idx) => {
+        const winner = calcMatchWinner(match, participants, selectedColumns);
+        if (winner && nextMatches[Math.floor(idx / 2)]) {
+          const nextMatch = nextMatches[Math.floor(idx / 2)];
+          if (idx % 2 === 0) {
+            nextMatch.participant1Id = winner;
+          } else {
+            nextMatch.participant2Id = winner;
+          }
+        }
+      });
+    }
+
+    return bracket;
+  }, [championship.bracket, participants, selectedColumns]);
+
+  const matchesWithScores = useMemo(() => {
+    if (!hydratedBracket) return [];
+
+    return hydratedBracket.map((match) => {
       const p1 = match.participant1Id
         ? participants.find((p) => p.id === match.participant1Id)
         : undefined;
@@ -47,21 +88,7 @@ export function BracketView({
           ? selectedColumns.reduce((s, c) => s + (p2.scores[c.id] ?? 0), 0)
           : 0;
 
-      let winnerId: string | undefined;
-      if (p1 && p2) {
-        if (score2 > score1) winnerId = p2.id;
-        else if (score1 > score2) winnerId = p1.id;
-        else if (p1 && p2) {
-          // Tiebreaker: última coluna
-          const lastCol = selectedColumns[selectedColumns.length - 1];
-          if (lastCol) {
-            const s1 = p1.scores[lastCol.id] ?? 0;
-            const s2 = p2.scores[lastCol.id] ?? 0;
-            if (s2 > s1) winnerId = p2.id;
-            else if (s1 > s2) winnerId = p1.id;
-          }
-        }
-      }
+      const winnerId = calcMatchWinner(match, participants, selectedColumns);
 
       return {
         match,
@@ -70,7 +97,7 @@ export function BracketView({
         winnerId,
       } as MatchWithWinner;
     });
-  }, [championship.bracket, participants, selectedColumns]);
+  }, [hydratedBracket, participants, selectedColumns]);
 
   const rounds = useMemo(() => {
     const roundMap = new Map<number, MatchWithWinner[]>();
@@ -148,4 +175,42 @@ function getRoundLabel(round: number): string {
     6: '32ª',
   };
   return labels[round] || `Rodada ${round}`;
+}
+
+function calcMatchWinner(
+  match: BracketMatch,
+  participants: Participant[],
+  selectedColumns: Column[]
+): string | undefined {
+  const p1 = match.participant1Id
+    ? participants.find((p) => p.id === match.participant1Id)
+    : undefined;
+  const p2 = match.participant2Id
+    ? participants.find((p) => p.id === match.participant2Id)
+    : undefined;
+
+  if (!p1 || !p2) return undefined;
+
+  const score1 = selectedColumns.reduce(
+    (s, c) => s + (p1.scores[c.id] ?? 0),
+    0
+  );
+  const score2 = selectedColumns.reduce(
+    (s, c) => s + (p2.scores[c.id] ?? 0),
+    0
+  );
+
+  if (score2 > score1) return p2.id;
+  if (score1 > score2) return p1.id;
+
+  // Tiebreaker: última coluna
+  const lastCol = selectedColumns[selectedColumns.length - 1];
+  if (lastCol) {
+    const s1 = p1.scores[lastCol.id] ?? 0;
+    const s2 = p2.scores[lastCol.id] ?? 0;
+    if (s2 > s1) return p2.id;
+    if (s1 > s2) return p1.id;
+  }
+
+  return undefined;
 }
