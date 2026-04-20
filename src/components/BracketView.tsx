@@ -12,7 +12,6 @@ interface MatchWithWinner {
   p1?: Participant & { score: number };
   p2?: Participant & { score: number };
   winnerId?: string;
-  isDraw?: boolean;
 }
 
 export function BracketView({
@@ -96,7 +95,6 @@ export function BracketView({
         p1: p1 ? { ...p1, score: score1 } : undefined,
         p2: p2 ? { ...p2, score: score2 } : undefined,
         winnerId: result.winnerId,
-        isDraw: result.isDraw,
       } as MatchWithWinner;
     });
   }, [hydratedBracket, participants, selectedColumns]);
@@ -128,7 +126,7 @@ export function BracketView({
             </h4>
             <div className="bracket-matches">
               {roundMatches.map((m, matchIdx) => (
-                <div key={matchIdx} className={`bracket-match ${m.isDraw ? 'draw' : ''}`}>
+                <div key={matchIdx} className="bracket-match">
                   <div className={`match-team ${m.p1 && m.winnerId === m.p1.id ? 'winner' : ''}`}>
                     {m.p1 ? (
                       <>
@@ -139,7 +137,6 @@ export function BracketView({
                       <span className="team-name">—</span>
                     )}
                   </div>
-                  {m.isDraw && <div className="match-draw-label">EMPATE</div>}
                   <div className="match-divider" />
                   <div className={`match-team ${m.p2 && m.winnerId === m.p2.id ? 'winner' : ''}`}>
                     {m.p2 ? (
@@ -184,7 +181,7 @@ function getMatchResult(
   match: BracketMatch,
   participants: Participant[],
   selectedColumns: Column[]
-): { winnerId?: string; isDraw: boolean } {
+): { winnerId?: string } {
   const p1 = match.participant1Id
     ? participants.find((p) => p.id === match.participant1Id)
     : undefined;
@@ -192,7 +189,7 @@ function getMatchResult(
     ? participants.find((p) => p.id === match.participant2Id)
     : undefined;
 
-  if (!p1 || !p2) return { isDraw: false };
+  if (!p1 || !p2) return {};
 
   const score1 = selectedColumns.reduce(
     (s, c) => s + (p1.scores[c.id] ?? 0),
@@ -203,18 +200,17 @@ function getMatchResult(
     0
   );
 
-  if (score2 > score1) return { winnerId: p2.id, isDraw: false };
-  if (score1 > score2) return { winnerId: p1.id, isDraw: false };
+  if (score2 > score1) return { winnerId: p2.id };
+  if (score1 > score2) return { winnerId: p1.id };
 
   // Tiebreaker: última coluna
   const lastCol = selectedColumns[selectedColumns.length - 1];
   if (lastCol) {
     const s1 = p1.scores[lastCol.id] ?? 0;
     const s2 = p2.scores[lastCol.id] ?? 0;
-    if (s2 > s1) return { winnerId: p2.id, isDraw: false };
-    if (s1 > s2) return { winnerId: p1.id, isDraw: false };
+    if (s2 > s1) return { winnerId: p2.id };
+    if (s1 > s2) return { winnerId: p1.id };
   }
 
-  // Empate
-  return { isDraw: true };
+  return {};
 }

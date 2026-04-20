@@ -163,31 +163,25 @@ export function GroupCard({
                 </tr>
               </thead>
               <tbody>
-                {standings.map((standing, idx) => {
-                  const prevTotal = idx > 0 ? standings[idx - 1].total : null;
-                  const isDraw = prevTotal !== null && standing.total === prevTotal;
-                  return (
-                    <tr key={standing.participant.id} className={standing.isClassified ? 'classified' : ''}>
-                      <td className="pos">{standing.position}</td>
-                      <td>{standing.participant.name}</td>
-                      {standing.scores.map((score, idx) => (
-                        <td key={idx} className="col-score">{score}</td>
-                      ))}
-                      <td className="col-total">
-                        <strong>{standing.total}</strong>
-                      </td>
-                      <td className="col-status">
-                        {standing.isClassified ? (
-                          <span className="badge badge-success">Classificado</span>
-                        ) : isDraw ? (
-                          <span className="badge badge-draw">⚔️ Empate</span>
-                        ) : (
-                          <span className="badge badge-danger">Eliminado</span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
+                {standings.map((standing) => (
+                  <tr key={standing.participant.id} className={standing.isClassified ? 'classified' : ''}>
+                    <td className="pos">{standing.position}</td>
+                    <td>{standing.participant.name}</td>
+                    {standing.scores.map((score, idx) => (
+                      <td key={idx} className="col-score">{score}</td>
+                    ))}
+                    <td className="col-total">
+                      <strong>{standing.total}</strong>
+                    </td>
+                    <td className="col-status">
+                      {standing.isClassified ? (
+                        <span className="badge badge-success">Classificado</span>
+                      ) : (
+                        <span className="badge badge-danger">Eliminado</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           )}
