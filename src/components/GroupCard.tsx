@@ -162,7 +162,7 @@ export function GroupCard({
                         {isDraw ? (
                           <span className="badge badge-draw">⚔️ Empate</span>
                         ) : standing.isClassified ? (
-                          <span className="badge badge-success">Classif</span>
+                          <span className="badge badge-success">Classificado</span>
                         ) : (
                           <span className="badge badge-danger">Eliminado</span>
                         )}
