@@ -119,7 +119,7 @@ function generateBracket(classifiedParticipantIds: string[]) {
   let matchId = 0;
 
   for (let r = rounds; r >= 1; r--) {
-    const matchesInRound = Math.pow(2, rounds - r);
+    const matchesInRound = Math.pow(2, r - 1);
     for (let pos = 0; pos < matchesInRound; pos++) {
       if (r === rounds) {
         // Primeira rodada: pares de seeds
