@@ -103,10 +103,9 @@ export function useChampionships() {
 function generateBracket(classifiedParticipantIds: string[]) {
   const classifieds = classifiedParticipantIds;
 
-  // Arredondar para próxima potência de 2
+  // Começa em Oitavas (8 slots) no mínimo
   let n = classifieds.length;
-  let pow = 0;
-  while (Math.pow(2, pow) < n) pow++;
+  let pow = Math.max(3, Math.ceil(Math.log2(n)));
   const totalSlots = Math.pow(2, pow);
 
   // Padronizar para próxima potência de 2 (byes = undefined)
