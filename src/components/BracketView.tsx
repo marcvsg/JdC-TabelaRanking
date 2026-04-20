@@ -110,7 +110,7 @@ export function BracketView({
       roundMap.get(m.match.round)!.push(m);
     });
     return Array.from(roundMap.entries())
-      .sort((a, b) => a[0] - b[0])
+      .sort((a, b) => b[0] - a[0])
       .map(([, matches]) => matches);
   }, [matchesWithScores]);
 
