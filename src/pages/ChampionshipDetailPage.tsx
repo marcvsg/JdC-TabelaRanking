@@ -8,6 +8,7 @@ import { Layout } from '../components/Layout';
 import { GroupCard } from '../components/GroupCard';
 import { StartPhase2Modal } from '../components/StartPhase2Modal';
 import { BracketView } from '../components/BracketView';
+import type { Championship, Participant, Column, BracketMatch } from '../lib/types';
 
 export function ChampionshipDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -169,7 +170,7 @@ function exportGroupsCSV(
   lines.push(`"${championship.name}","Fase 1 - Grupos"`);
   lines.push('');
 
-  championship.groups.forEach((group) => {
+  championship.groups.forEach((group: any) => {
     lines.push(`"${group.name}"`);
 
     // Calcular standings
@@ -210,7 +211,7 @@ function exportGroupsCSV(
         standing.total,
         standing.isClassified ? 'Classificado' : 'Eliminado',
       ];
-      lines.push(row.map((v) => `"${v}"`).join(','));
+      lines.push((row as (string | number)[]).map((v) => `"${v}"`).join(','));
     });
 
     lines.push('');
@@ -258,7 +259,7 @@ function exportBracketCSV(
     };
 
     const matchesByRound = new Map<number, any[]>();
-    championship.bracket.forEach((match) => {
+    championship.bracket.forEach((match: BracketMatch) => {
       if (!matchesByRound.has(match.round)) {
         matchesByRound.set(match.round, []);
       }
@@ -301,7 +302,7 @@ function exportBracketCSV(
           score2,
           winner,
         ];
-        lines.push(row.map((v) => `"${v}"`).join(','));
+        lines.push((row as (string | number)[]).map((v) => `"${v}"`).join(','));
       });
     });
   }
