@@ -6,7 +6,6 @@ import {
   deleteDoc,
   updateDoc,
   doc,
-  deleteField,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { Championship, ChampionshipGroup } from '../lib/types';
