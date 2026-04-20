@@ -177,10 +177,10 @@ export function GroupCard({
                         <strong>{standing.total}</strong>
                       </td>
                       <td className="col-status">
-                        {isDraw ? (
-                          <span className="badge badge-draw">⚔️ Empate</span>
-                        ) : standing.isClassified ? (
+                        {standing.isClassified ? (
                           <span className="badge badge-success">Classificado</span>
+                        ) : isDraw ? (
+                          <span className="badge badge-draw">⚔️ Empate</span>
                         ) : (
                           <span className="badge badge-danger">Eliminado</span>
                         )}
