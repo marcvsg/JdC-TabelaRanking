@@ -6,6 +6,7 @@ import {
   deleteDoc,
   updateDoc,
   doc,
+  deleteField,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { Championship, ChampionshipGroup } from '../lib/types';
@@ -108,7 +109,8 @@ export function useChampionships() {
       // Remover: limpar participant1Id do match atual
       updatedBracket = updatedBracket.map((match) => {
         if (match.id === matchId) {
-          return { ...match, participant1Id: undefined };
+          const { participant1Id, ...rest } = match;
+          return rest;
         }
         return match;
       });
@@ -128,9 +130,11 @@ export function useChampionships() {
         updatedBracket = updatedBracket.map((match) => {
           if (match.id === affectedMatch.id) {
             if (position % 2 === 0) {
-              return { ...match, participant1Id: undefined };
+              const { participant1Id, ...rest } = match;
+              return rest;
             } else {
-              return { ...match, participant2Id: undefined };
+              const { participant2Id, ...rest } = match;
+              return rest;
             }
           }
           return match;
