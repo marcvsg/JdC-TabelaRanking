@@ -115,6 +115,23 @@ export function BracketView({
                       <>
                         <span className="team-name">{m.p1.name}</span>
                         <span className="team-score">{m.p1.score}</span>
+                        {isAdmin && (
+                          <button
+                            className="btn-remove-participant"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (onUpdateMatchWinner && !loadingMatchId) {
+                                setLoadingMatchId(m.match.id);
+                                onUpdateMatchWinner(m.match.id, '').finally(() =>
+                                  setLoadingMatchId(null)
+                                );
+                              }
+                            }}
+                            title="Remover participante"
+                          >
+                            ✕
+                          </button>
+                        )}
                       </>
                     ) : (
                       <span className="team-name">—</span>
@@ -136,6 +153,23 @@ export function BracketView({
                       <>
                         <span className="team-name">{m.p2.name}</span>
                         <span className="team-score">{m.p2.score}</span>
+                        {isAdmin && (
+                          <button
+                            className="btn-remove-participant"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (onUpdateMatchWinner && !loadingMatchId) {
+                                setLoadingMatchId(m.match.id);
+                                onUpdateMatchWinner(m.match.id, '').finally(() =>
+                                  setLoadingMatchId(null)
+                                );
+                              }
+                            }}
+                            title="Remover participante"
+                          >
+                            ✕
+                          </button>
+                        )}
                       </>
                     ) : (
                       <span className="team-name">—</span>

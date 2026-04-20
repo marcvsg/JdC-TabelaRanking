@@ -1357,6 +1357,22 @@ input, button {
   border-bottom: 1px solid #f59e0b;
 }
 
+.btn-remove-participant {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0;
+  min-width: 16px;
+  transition: color 0.2s;
+  flex-shrink: 0;
+}
+
+.btn-remove-participant:hover {
+  color: #fca5a5;
+}
+
 .bracket-columns-info {
   text-align: center;
   margin-top: 20px;
