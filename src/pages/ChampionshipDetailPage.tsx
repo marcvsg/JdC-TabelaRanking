@@ -122,6 +122,12 @@ export function ChampionshipDetailPage() {
           <>
             <div className="phase-header">
               <h2>Fase 2 - Mata-mata</h2>
+              <button
+                onClick={() => exportBracketCSV(championship, participants, columns)}
+                className="btn btn-green"
+              >
+                📥 Exportar Bracket
+              </button>
             </div>
             <BracketView
               championship={championship}
@@ -142,4 +148,94 @@ export function ChampionshipDetailPage() {
       )}
     </Layout>
   );
+}
+
+function exportBracketCSV(
+  championship: Championship,
+  participants: Participant[],
+  columns: Column[]
+) {
+  const phase2Columns = columns.filter((c) =>
+    championship.phase2ColumnIds?.includes(c.id)
+  );
+
+  const lines: string[] = [];
+  lines.push(`"${championship.name}","Mata-mata"`);
+  lines.push('');
+
+  // Header
+  const header = ['Rodada', 'Posição', 'Participante 1', 'Score 1', 'Participante 2', 'Score 2', 'Vencedor'];
+  lines.push(header.map((h) => `"${h}"`).join(','));
+
+  // Matches
+  if (championship.bracket) {
+    const getRoundLabel = (round: number) => {
+      const labels: Record<number, string> = {
+        1: 'Final',
+        2: 'Semifinal',
+        3: 'Quartas',
+        4: 'Oitavas',
+        5: '16ª',
+        6: '32ª',
+      };
+      return labels[round] || `Rodada ${round}`;
+    };
+
+    const matchesByRound = new Map<number, any[]>();
+    championship.bracket.forEach((match) => {
+      if (!matchesByRound.has(match.round)) {
+        matchesByRound.set(match.round, []);
+      }
+      matchesByRound.get(match.round)!.push(match);
+    });
+
+    const sortedRounds = Array.from(matchesByRound.keys()).sort((a, b) => b[0] - a[0]);
+
+    sortedRounds.forEach((round) => {
+      const matches = matchesByRound.get(round) || [];
+      matches.forEach((match, idx) => {
+        const p1 = match.participant1Id
+          ? participants.find((p) => p.id === match.participant1Id)
+          : null;
+        const p2 = match.participant2Id
+          ? participants.find((p) => p.id === match.participant2Id)
+          : null;
+
+        const score1 =
+          p1 && phase2Columns
+            ? phase2Columns.reduce((s, c) => s + (p1.scores[c.id] ?? 0), 0)
+            : 0;
+        const score2 =
+          p2 && phase2Columns
+            ? phase2Columns.reduce((s, c) => s + (p2.scores[c.id] ?? 0), 0)
+            : 0;
+
+        let winner = '';
+        if (p1 && p2) {
+          if (score2 > score1) winner = p2.name;
+          else if (score1 > score2) winner = p1.name;
+        }
+
+        const row = [
+          getRoundLabel(round),
+          idx + 1,
+          p1?.name || '—',
+          score1,
+          p2?.name || '—',
+          score2,
+          winner,
+        ];
+        lines.push(row.map((v) => `"${v}"`).join(','));
+      });
+    });
+  }
+
+  const csv = lines.join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${championship.name}-bracket.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
 }
