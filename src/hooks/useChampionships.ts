@@ -98,63 +98,74 @@ export function useChampionships() {
     if (!championship || !championship.bracket) return;
 
     const isRemoving = winnerId === '';
+    let updatedBracket = [...championship.bracket];
 
-    // Atualizar match com winnerId
-    let updatedBracket = championship.bracket.map((match) => {
-      if (match.id === matchId) {
-        return { ...match, participant1Id: winnerId || undefined };
+    // Encontrar o match original
+    const originalMatch = updatedBracket.find((m) => m.id === matchId);
+    if (!originalMatch) return;
+
+    if (isRemoving) {
+      // Remover: limpar participant1Id do match atual
+      updatedBracket = updatedBracket.map((match) => {
+        if (match.id === matchId) {
+          return { ...match, participant1Id: undefined };
+        }
+        return match;
+      });
+
+      // Remover de rodadas subsequentes (cascata)
+      const currentRound = originalMatch.round;
+      const position = originalMatch.position;
+      let nextPosition = Math.floor(position / 2);
+
+      for (let r = currentRound - 1; r >= 1; r--) {
+        const matchesInRound = updatedBracket.filter((m) => m.round === r);
+        if (nextPosition >= matchesInRound.length) break;
+
+        const affectedMatch = matchesInRound[nextPosition];
+        if (!affectedMatch) break;
+
+        updatedBracket = updatedBracket.map((match) => {
+          if (match.id === affectedMatch.id) {
+            if (position % 2 === 0) {
+              return { ...match, participant1Id: undefined };
+            } else {
+              return { ...match, participant2Id: undefined };
+            }
+          }
+          return match;
+        });
+
+        nextPosition = Math.floor(nextPosition / 2);
       }
-      return match;
-    });
+    } else {
+      // Adicionar: setar participant1Id do match atual
+      updatedBracket = updatedBracket.map((match) => {
+        if (match.id === matchId) {
+          return { ...match, participant1Id: winnerId };
+        }
+        return match;
+      });
 
-    // Propagar vencedor/remoção para próxima rodada
-    const matchWithWinner = updatedBracket.find((m) => m.id === matchId);
-    if (matchWithWinner) {
-      const currentRound = matchWithWinner.round;
+      // Propagar para próxima rodada
+      const currentRound = originalMatch.round;
       const nextRound = currentRound - 1;
-      const position = matchWithWinner.position;
+      const position = originalMatch.position;
+      const nextPosition = Math.floor(position / 2);
 
-      if (isRemoving) {
-        // Remover de todas as rodadas subsequentes
-        updatedBracket = updatedBracket.map((match) => {
-          if (match.round < currentRound) {
-            const matchesInRound = updatedBracket.filter((m) => m.round === match.round);
-            let affectedPosition = Math.floor(position / 2);
-
-            while (affectedPosition < matchesInRound.length && match.round < currentRound) {
-              const affectedMatch = matchesInRound[affectedPosition];
-              if (affectedMatch.id === match.id) {
-                if (position % 2 === 0) {
-                  return { ...match, participant1Id: undefined };
-                } else {
-                  return { ...match, participant2Id: undefined };
-                }
-              }
-              affectedPosition = Math.floor(affectedPosition / 2);
+      updatedBracket = updatedBracket.map((match) => {
+        if (match.round === nextRound) {
+          const matchesInRound = updatedBracket.filter((m) => m.round === nextRound);
+          if (nextPosition < matchesInRound.length && matchesInRound[nextPosition].id === match.id) {
+            if (position % 2 === 0) {
+              return { ...match, participant1Id: winnerId };
+            } else {
+              return { ...match, participant2Id: winnerId };
             }
           }
-          return match;
-        });
-      } else {
-        // Propagar vencedor para próxima rodada
-        updatedBracket = updatedBracket.map((match) => {
-          if (match.round === nextRound) {
-            const matchesInRound = updatedBracket.filter((m) => m.round === nextRound);
-            const nextPosition = Math.floor(position / 2);
-            if (nextPosition < matchesInRound.length) {
-              const nextMatch = matchesInRound[nextPosition];
-              if (nextMatch.id === match.id) {
-                if (position % 2 === 0) {
-                  return { ...match, participant1Id: winnerId };
-                } else {
-                  return { ...match, participant2Id: winnerId };
-                }
-              }
-            }
-          }
-          return match;
-        });
-      }
+        }
+        return match;
+      });
     }
 
     await updateDoc(doc(db, COLLECTION, championshipId), {
