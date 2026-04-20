@@ -1314,6 +1314,15 @@ input, button {
   font-weight: 600;
 }
 
+.match-team.clickable {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.match-team.clickable:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
 .team-name {
   flex: 1;
   white-space: nowrap;

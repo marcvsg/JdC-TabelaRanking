@@ -89,6 +89,54 @@ export function useChampionships() {
     });
   }
 
+  async function updateMatchWinner(
+    championshipId: string,
+    matchId: string,
+    winnerId: string
+  ) {
+    const championship = championships.find((c) => c.id === championshipId);
+    if (!championship || !championship.bracket) return;
+
+    // Atualizar match com winnerId e propagar para próxima rodada
+    let updatedBracket = championship.bracket.map((match) => {
+      if (match.id === matchId) {
+        return { ...match, participant1Id: winnerId };
+      }
+      return match;
+    });
+
+    // Propagar vencedor para próxima rodada
+    const matchWithWinner = updatedBracket.find((m) => m.id === matchId);
+    if (matchWithWinner) {
+      const currentRound = matchWithWinner.round;
+      const nextRound = currentRound - 1;
+      const position = matchWithWinner.position;
+      const nextMatchIndex = position < 2 ? position * 2 : (position - 2) * 2 + 1;
+
+      updatedBracket = updatedBracket.map((match) => {
+        if (match.round === nextRound) {
+          const matchesInRound = updatedBracket.filter((m) => m.round === nextRound);
+          const nextPosition = Math.floor(position / 2);
+          if (nextPosition < matchesInRound.length) {
+            const nextMatch = matchesInRound[nextPosition];
+            if (nextMatch.id === match.id) {
+              if (position % 2 === 0) {
+                return { ...match, participant1Id: winnerId };
+              } else {
+                return { ...match, participant2Id: winnerId };
+              }
+            }
+          }
+        }
+        return match;
+      });
+    }
+
+    await updateDoc(doc(db, COLLECTION, championshipId), {
+      bracket: updatedBracket,
+    });
+  }
+
   return {
     championships,
     loading,
@@ -97,6 +145,7 @@ export function useChampionships() {
     updateChampionship,
     updateGroupParticipants,
     startPhase2,
+    updateMatchWinner,
   };
 }
 

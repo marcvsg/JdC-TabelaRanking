@@ -13,7 +13,7 @@ import type { Championship, Participant, Column, BracketMatch } from '../lib/typ
 export function ChampionshipDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { role } = useAuthContext();
-  const { championships, updateGroupParticipants, startPhase2 } = useChampionships();
+  const { championships, updateGroupParticipants, startPhase2, updateMatchWinner } = useChampionships();
   const { columns } = useColumns();
   const { participants } = useParticipants();
   const navigate = useNavigate();
@@ -144,6 +144,10 @@ export function ChampionshipDetailPage() {
               championship={championship}
               participants={participants}
               columns={columns}
+              isAdmin={isAdmin}
+              onUpdateMatchWinner={(matchId, winnerId) =>
+                updateMatchWinner(championship.id, matchId, winnerId)
+              }
             />
           </>
         )}
