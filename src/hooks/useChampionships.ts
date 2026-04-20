@@ -111,7 +111,6 @@ export function useChampionships() {
       const currentRound = matchWithWinner.round;
       const nextRound = currentRound - 1;
       const position = matchWithWinner.position;
-      const nextMatchIndex = position < 2 ? position * 2 : (position - 2) * 2 + 1;
 
       updatedBracket = updatedBracket.map((match) => {
         if (match.round === nextRound) {
