@@ -1041,6 +1041,16 @@ input, button {
   cursor: pointer;
 }
 
+.checkbox-item.disabled {
+  color: #64748b;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.checkbox-item.disabled input[type="checkbox"] {
+  cursor: not-allowed;
+}
+
 .edit-actions {
   display: flex;
   gap: 8px;

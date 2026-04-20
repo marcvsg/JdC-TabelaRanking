@@ -100,16 +100,34 @@ export function GroupCard({
           <div className="participants-selector">
             <label className="form-label">Selecione os participantes para esta chave:</label>
             <div className="checkbox-group">
-              {allParticipants.map((p) => (
-                <label key={p.id} className="checkbox-item">
-                  <input
-                    type="checkbox"
-                    checked={selectedParticipantIds.includes(p.id)}
-                    onChange={() => toggleParticipant(p.id)}
-                  />
-                  {p.name}
-                </label>
-              ))}
+              {allParticipants.map((p) => {
+                const inOtherGroup = championship.groups.some(
+                  (g) =>
+                    g.id !== group.id &&
+                    g.participantIds.includes(p.id)
+                );
+                const isSelected = selectedParticipantIds.includes(p.id);
+                return (
+                  <label
+                    key={p.id}
+                    className={`checkbox-item ${inOtherGroup && !isSelected ? 'disabled' : ''}`}
+                    title={inOtherGroup && !isSelected ? `Já está em outra chave` : ''}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => toggleParticipant(p.id)}
+                      disabled={inOtherGroup && !isSelected}
+                    />
+                    {p.name}
+                    {inOtherGroup && !isSelected && (
+                      <span className="text-muted" style={{ fontSize: '0.75rem', marginLeft: '4px' }}>
+                        (já está em outro grupo)
+                      </span>
+                    )}
+                  </label>
+                );
+              })}
             </div>
           </div>
           <div className="edit-actions">
