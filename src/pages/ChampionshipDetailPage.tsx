@@ -266,7 +266,7 @@ function exportBracketCSV(
       matchesByRound.get(match.round)!.push(match);
     });
 
-    const sortedRounds = Array.from(matchesByRound.keys()).sort((a, b) => b[0] - a[0]);
+    const sortedRounds = Array.from(matchesByRound.keys()).sort((a, b) => b - a);
 
     sortedRounds.forEach((round) => {
       const matches = matchesByRound.get(round) || [];
