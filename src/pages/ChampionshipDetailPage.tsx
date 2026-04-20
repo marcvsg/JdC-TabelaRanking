@@ -90,14 +90,22 @@ export function ChampionshipDetailPage() {
           <>
             <div className="phase-header">
               <h2>Fase 1 - Grupos</h2>
-              {isAdmin && (
+              <div className="phase-actions">
                 <button
-                  onClick={() => setShowPhase2Modal(true)}
-                  className="btn btn-blue"
+                  onClick={() => exportGroupsCSV(championship, participants, selectedColumns)}
+                  className="btn btn-green"
                 >
-                  🏆 Iniciar Mata-mata
+                  📥 Exportar
                 </button>
-              )}
+                {isAdmin && (
+                  <button
+                    onClick={() => setShowPhase2Modal(true)}
+                    className="btn btn-blue"
+                  >
+                    🏆 Iniciar Mata-mata
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="groups-grid">
@@ -122,12 +130,14 @@ export function ChampionshipDetailPage() {
           <>
             <div className="phase-header">
               <h2>Fase 2 - Mata-mata</h2>
-              <button
-                onClick={() => exportBracketCSV(championship, participants, columns)}
-                className="btn btn-green"
-              >
-                📥 Exportar Bracket
-              </button>
+              <div className="phase-actions">
+                <button
+                  onClick={() => exportBracketCSV(championship, participants, columns)}
+                  className="btn btn-green"
+                >
+                  📥 Exportar
+                </button>
+              </div>
             </div>
             <BracketView
               championship={championship}
@@ -148,6 +158,72 @@ export function ChampionshipDetailPage() {
       )}
     </Layout>
   );
+}
+
+function exportGroupsCSV(
+  championship: Championship,
+  participants: Participant[],
+  columns: Column[]
+) {
+  const lines: string[] = [];
+  lines.push(`"${championship.name}","Fase 1 - Grupos"`);
+  lines.push('');
+
+  championship.groups.forEach((group) => {
+    lines.push(`"${group.name}"`);
+
+    // Calcular standings
+    const groupParticipants = participants.filter((p) =>
+      group.participantIds.includes(p.id)
+    );
+    const standings = [...groupParticipants]
+      .sort((a, b) => {
+        const totalA = columns.reduce((s, c) => s + (a.scores[c.id] ?? 0), 0);
+        const totalB = columns.reduce((s, c) => s + (b.scores[c.id] ?? 0), 0);
+        if (totalB !== totalA) return totalB - totalA;
+        const lastCol = columns[columns.length - 1];
+        if (lastCol) {
+          const scoreA = a.scores[lastCol.id] ?? 0;
+          const scoreB = b.scores[lastCol.id] ?? 0;
+          if (scoreB !== scoreA) return scoreB - scoreA;
+        }
+        return 0;
+      })
+      .map((p, idx) => ({
+        position: idx + 1,
+        name: p.name,
+        scores: columns.map((c) => p.scores[c.id] ?? 0),
+        total: columns.reduce((s, c) => s + (p.scores[c.id] ?? 0), 0),
+        isClassified: idx < championship.classifyCount,
+      }));
+
+    // Header
+    const header = ['Pos', 'Participante', ...columns.map((c) => c.name), 'Total', 'Status'];
+    lines.push(header.map((h) => `"${h}"`).join(','));
+
+    // Rows
+    standings.forEach((standing) => {
+      const row = [
+        standing.position,
+        standing.name,
+        ...standing.scores,
+        standing.total,
+        standing.isClassified ? 'Classificado' : 'Eliminado',
+      ];
+      lines.push(row.map((v) => `"${v}"`).join(','));
+    });
+
+    lines.push('');
+  });
+
+  const csv = lines.join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${championship.name}-grupos.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 function exportBracketCSV(

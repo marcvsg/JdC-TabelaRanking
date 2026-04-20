@@ -1370,3 +1370,8 @@ input, button {
   color: #fff;
   margin: 0;
 }
+
+.phase-actions {
+  display: flex;
+  gap: 8px;
+}
