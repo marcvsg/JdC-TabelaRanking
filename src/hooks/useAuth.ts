@@ -25,6 +25,11 @@ export function useAuth() {
           const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
           if (userDoc.exists()) {
             setRole(userDoc.data().role as UserRole);
+          } else {
+            // Profile deleted but user still logged in — auto logout
+            await signOut(auth);
+            setUser(null);
+            setRole(null);
           }
         }
       } else {
