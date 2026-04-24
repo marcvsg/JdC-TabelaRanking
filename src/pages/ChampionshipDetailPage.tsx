@@ -42,25 +42,29 @@ export function ChampionshipDetailPage() {
   const currentPhase = championship.currentPhase ?? 1;
 
   const handleStartPhase2 = async (columnIds: string[]) => {
-    // Calcular classificados de cada grupo
+    // Calcular classificados de cada grupo usando as colunas selecionadas
     const classifiedIds: string[] = [];
+    const phase2Columns = columns
+      .filter((c) => columnIds.includes(c.id))
+      .sort((a, b) => a.order - b.order);
+
     for (const group of championship.groups) {
       // Ordenar participantes por pontuação
       const groupParticipants = participants.filter((p) =>
         group.participantIds.includes(p.id)
       );
       const sorted = [...groupParticipants].sort((a, b) => {
-        const totalA = selectedColumns.reduce(
+        const totalA = phase2Columns.reduce(
           (s, c) => s + (a.scores[c.id] ?? 0),
           0
         );
-        const totalB = selectedColumns.reduce(
+        const totalB = phase2Columns.reduce(
           (s, c) => s + (b.scores[c.id] ?? 0),
           0
         );
         if (totalB !== totalA) return totalB - totalA;
         // Tiebreaker
-        const lastCol = selectedColumns[selectedColumns.length - 1];
+        const lastCol = phase2Columns[phase2Columns.length - 1];
         if (lastCol) {
           const scoreA = a.scores[lastCol.id] ?? 0;
           const scoreB = b.scores[lastCol.id] ?? 0;
@@ -96,14 +100,14 @@ export function ChampionshipDetailPage() {
                   onClick={() => exportGroupsCSV(championship, participants, selectedColumns)}
                   className="btn btn-green"
                 >
-                  📥 Exportar
+                  Exportar
                 </button>
                 {isAdmin && (
                   <button
                     onClick={() => setShowPhase2Modal(true)}
                     className="btn btn-blue"
                   >
-                    🏆 Iniciar Mata-mata
+                    Iniciar Mata-mata
                   </button>
                 )}
               </div>
@@ -136,7 +140,7 @@ export function ChampionshipDetailPage() {
                   onClick={() => exportBracketCSV(championship, participants, columns)}
                   className="btn btn-green"
                 >
-                  📥 Exportar
+                  Exportar
                 </button>
               </div>
             </div>

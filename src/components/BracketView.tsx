@@ -60,8 +60,8 @@ export function BracketView({
           ? selectedColumns.reduce((s, c) => s + (p2.scores[c.id] ?? 0), 0)
           : 0;
 
-      // Vencedor é definido manualmente pelo admin (stored em participant1Id)
-      const winnerId = match.participant1Id;
+      // Vencedor é armazenado em winnerId
+      const winnerId = match.winnerId;
 
       return {
         match,
@@ -82,7 +82,13 @@ export function BracketView({
     });
     return Array.from(roundMap.entries())
       .sort((a, b) => b[0] - a[0])
-      .map(([, matches]) => matches);
+      .map(([, matches]) => matches.sort((a, b) => a.match.position - b.match.position));
+  }, [matchesWithScores]);
+
+  const champion = useMemo(() => {
+    const finalMatch = matchesWithScores.find((m) => m.match.round === 1);
+    if (!finalMatch || !finalMatch.winnerId) return null;
+    return finalMatch.p1?.id === finalMatch.winnerId ? finalMatch.p1 : finalMatch.p2;
   }, [matchesWithScores]);
 
   if (!championship.bracket || championship.bracket.length === 0) {
@@ -180,6 +186,24 @@ export function BracketView({
             </div>
           </div>
         ))}
+
+        <div className="bracket-round">
+          <h4 className="round-label">🏆 Campeão</h4>
+          <div className="bracket-matches">
+            <div className="bracket-match">
+              {champion ? (
+                <div className="match-team winner">
+                  <span className="team-name">{champion.name}</span>
+                  <span className="team-score">{champion.score}</span>
+                </div>
+              ) : (
+                <div className="match-team">
+                  <span className="team-name">—</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="bracket-columns-info">

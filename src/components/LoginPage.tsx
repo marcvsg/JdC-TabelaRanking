@@ -51,13 +51,21 @@ export function LoginPage() {
           <div>
             <label className="form-label">Senha</label>
             <input
-              type="password"
+              type="text"
               required
               minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={'*'.repeat(password.length)}
+              onChange={(e) => {
+                const typed = e.currentTarget.value;
+                const diff = typed.length - password.length;
+                if (diff > 0) {
+                  setPassword(password + typed.slice(-diff));
+                } else if (diff < 0) {
+                  setPassword(password.slice(0, password.length + diff));
+                }
+              }}
               className="form-input"
-              placeholder="******"
+              placeholder="Senha"
             />
           </div>
 

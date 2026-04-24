@@ -23,6 +23,7 @@ export interface BracketMatch {
   position: number;
   participant1Id?: string;
   participant2Id?: string;
+  winnerId?: string;
 }
 
 export interface Championship {

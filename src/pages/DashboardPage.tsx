@@ -84,10 +84,10 @@ export function DashboardPage() {
           </div>
           <AddColumnButton onAdd={addColumn} />
           <button onClick={() => navigate('/import')} className="btn btn-blue">
-            📥 Importar CSV
+            Importar CSV
           </button>
           <button onClick={exportCSV} className="btn btn-green">
-            📤 Exportar CSV
+            Exportar CSV
           </button>
           <AdminUserManager currentUid={user!.uid} />
         </div>

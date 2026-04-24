@@ -1,4 +1,4 @@
-/* ===== Custom Fonts ===== */
+/* ===== Custom Fonts =====   */
 @font-face {
   font-family: 'Volter';
   src: url('./assets/fonts/volter-normal.ttf') format('truetype');
@@ -18,6 +18,7 @@
   margin: 0;
   padding: 0;
 }
+
 
 body {
   font-family: 'Volter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -106,6 +107,7 @@ input, button {
 .form-input::placeholder {
   color: #919191;
 }
+
 
 .form-input:focus {
   border-color: #3b82f6;
@@ -209,13 +211,13 @@ input, button {
   min-height: 100vh;
 }
 
-/* ===== Habbo 9-slice Header ===== */
-.habbo-header {
+/* ===== Panel 9-slice Header ===== */
+.panel-header {
   position: relative;
   margin: 12px;
 }
 
-.habbo-border {
+.panel-border {
   position: absolute;
   inset: 0;
   display: grid;
@@ -225,51 +227,51 @@ input, button {
   image-rendering: pixelated;
 }
 
-.habbo-border .slice {
+.panel-border .slice {
   display: block;
 }
 
-.habbo-border .slice img,
-.habbo-border img.slice {
+.panel-border .slice img,
+.panel-border img.slice {
   display: block;
 }
 
 /* Corners */
-.habbo-border .tl { grid-area: 1 / 1; }
-.habbo-border .tr { grid-area: 1 / 3; }
-.habbo-border .bl { grid-area: 3 / 1; }
-.habbo-border .br { grid-area: 3 / 3; }
+.panel-border .tl { grid-area: 1 / 1; }
+.panel-border .tr { grid-area: 1 / 3; }
+.panel-border .bl { grid-area: 3 / 1; }
+.panel-border .br { grid-area: 3 / 3; }
 
 /* Edges (repeat-fill) */
-.habbo-border .tm {
+.panel-border .tm {
   grid-area: 1 / 2;
   background-repeat: repeat-x;
   background-size: auto 100%;
 }
-.habbo-border .bm {
+.panel-border .bm {
   grid-area: 3 / 2;
   background-repeat: repeat-x;
   background-size: auto 100%;
 }
-.habbo-border .ml {
+.panel-border .ml {
   grid-area: 2 / 1;
   background-repeat: repeat-y;
   background-size: 100% auto;
 }
-.habbo-border .mr {
+.panel-border .mr {
   grid-area: 2 / 3;
   background-repeat: repeat-y;
   background-size: 100% auto;
 }
 
 /* Center fill */
-.habbo-border .mm {
+.panel-border .mm {
   grid-area: 2 / 2;
   background-repeat: repeat;
   background-size: auto;
 }
 
-.habbo-header-content {
+.panel-header-content {
   position: relative;
   z-index: 1;
   display: flex;
@@ -282,6 +284,11 @@ input, button {
   display: flex;
   align-items: center;
   gap: 24px;
+}
+
+.header-left img {
+  width: 285px;
+  height: 63px;
 }
 
 .header-nav {
@@ -892,16 +899,17 @@ input, button {
 
 .championships-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
 }
 
 .championship-card {
   background-color: #1e293b;
   border: 1px solid #334155;
   border-radius: 8px;
-  padding: 20px;
+  padding: 28px;
   transition: border-color 0.2s, background-color 0.2s;
+  cursor: pointer;
 }
 
 .championship-card:hover {
@@ -1025,20 +1033,29 @@ input, button {
 .checkbox-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  margin: 8px 0;
 }
 
 .checkbox-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 18px;
   color: #cbd5e1;
   font-size: 0.875rem;
   cursor: pointer;
+  padding: 6px 0;
+  width: auto;
+  max-width: 100%;
+  justify-content: flex-start;
 }
 
 .checkbox-item input[type="checkbox"] {
   cursor: pointer;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin: 0;
 }
 
 .checkbox-item.disabled {
@@ -1168,6 +1185,7 @@ input, button {
 }
 
 .modal {
+  position: relative;
   background-color: #1e293b;
   border: 1px solid #334155;
   border-radius: 8px;
@@ -1176,6 +1194,7 @@ input, button {
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
 }
 
 .modal h2 {
@@ -1187,14 +1206,20 @@ input, button {
 
 .form-group {
   margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 .form-group label {
-  display: block;
+  display: flex;
   font-size: 0.875rem;
   font-weight: 500;
   color: #cbd5e1;
   margin-bottom: 8px;
+  height: auto;
+  line-height: 1.4;
+  min-height: 20px;
 }
 
 .form-group input,
@@ -1207,6 +1232,7 @@ input, button {
   color: #fff;
   font-size: 0.875rem;
   outline: none;
+  box-sizing: border-box;
 }
 
 .form-group input:focus,
@@ -1218,16 +1244,30 @@ input, button {
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 20px;
+  width: 100%;
+  align-items: start;
+  margin-bottom: 20px;
+}
+
+.form-row .form-group {
+  width: 100%;
+  margin-bottom: 0;
 }
 
 .modal-actions {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap-reverse;
   margin-top: 24px;
   padding-top: 16px;
   border-top: 1px solid #334155;
+}
+
+.modal-actions button {
+  min-width: 100px;
 }
 
 .phase2-info {
@@ -1310,7 +1350,6 @@ input, button {
 }
 
 .match-team.winner {
-  background-color: rgba(34, 197, 94, 0.15);
   font-weight: 600;
 }
 

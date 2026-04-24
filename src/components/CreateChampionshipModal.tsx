@@ -97,7 +97,7 @@ export function CreateChampionshipModal({
             </div>
 
             <div className="form-group">
-              <label htmlFor="classify">Quantos Classificam por Grupo</label>
+              <label htmlFor="classify">Qtd Classif p/ grupo</label>
               <input
                 id="classify"
                 type="number"

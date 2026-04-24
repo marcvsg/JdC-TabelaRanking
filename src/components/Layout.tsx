@@ -18,9 +18,9 @@ export function Layout({ children }: { children: ReactNode }) {
 
   return (
     <div className="layout">
-      <header className="habbo-header">
+      <header className="panel-header">
         {/* 9-slice border */}
-        <div className="habbo-border">
+        <div className="panel-border">
           <img src={topLeft} className="slice tl" alt="" />
           <div className="slice tm" style={{ backgroundImage: `url(${topMiddle})` }} />
           <img src={topRight} className="slice tr" alt="" />
@@ -35,7 +35,7 @@ export function Layout({ children }: { children: ReactNode }) {
         </div>
 
         {/* Content on top of the 9-slice */}
-        <div className="habbo-header-content">
+        <div className="panel-header-content">
           <div className="header-left">
             <img src={logo} alt="Dashboard" />
             <nav className="header-nav">

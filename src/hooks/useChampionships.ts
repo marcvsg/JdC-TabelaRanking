@@ -85,7 +85,7 @@ export function useChampionships() {
     await updateDoc(doc(db, COLLECTION, championshipId), {
       currentPhase: 2,
       phase2ColumnIds,
-      bracket,
+      bracket: bracket.map(cleanMatch),
     });
   }
 
@@ -105,10 +105,10 @@ export function useChampionships() {
     if (!originalMatch) return;
 
     if (isRemoving) {
-      // Remover: limpar participant1Id do match atual
+      // Remover: limpar winnerId do match atual
       updatedBracket = updatedBracket.map((match) => {
         if (match.id === matchId) {
-          const { participant1Id, ...rest } = match;
+          const { winnerId, ...rest } = match;
           return rest;
         }
         return match;
@@ -142,10 +142,10 @@ export function useChampionships() {
         nextPosition = Math.floor(nextPosition / 2);
       }
     } else {
-      // Adicionar: setar participant1Id do match atual
+      // Adicionar: setar winnerId do match atual
       updatedBracket = updatedBracket.map((match) => {
         if (match.id === matchId) {
-          return { ...match, participant1Id: winnerId };
+          return { ...match, winnerId };
         }
         return match;
       });
@@ -156,23 +156,25 @@ export function useChampionships() {
       const position = originalMatch.position;
       const nextPosition = Math.floor(position / 2);
 
-      updatedBracket = updatedBracket.map((match) => {
-        if (match.round === nextRound) {
-          const matchesInRound = updatedBracket.filter((m) => m.round === nextRound);
-          if (nextPosition < matchesInRound.length && matchesInRound[nextPosition].id === match.id) {
+      const matchesInNextRound = updatedBracket.filter((m) => m.round === nextRound);
+      const targetMatch = matchesInNextRound[nextPosition];
+
+      if (targetMatch) {
+        updatedBracket = updatedBracket.map((match) => {
+          if (match.id === targetMatch.id) {
             if (position % 2 === 0) {
               return { ...match, participant1Id: winnerId };
             } else {
               return { ...match, participant2Id: winnerId };
             }
           }
-        }
-        return match;
-      });
+          return match;
+        });
+      }
     }
 
     await updateDoc(doc(db, COLLECTION, championshipId), {
-      bracket: updatedBracket,
+      bracket: updatedBracket.map(cleanMatch),
     });
   }
 
@@ -186,6 +188,12 @@ export function useChampionships() {
     startPhase2,
     updateMatchWinner,
   };
+}
+
+function cleanMatch(match: any) {
+  return Object.fromEntries(
+    Object.entries(match).filter(([, value]) => value !== undefined)
+  );
 }
 
 function generateBracket(classifiedParticipantIds: string[]) {
